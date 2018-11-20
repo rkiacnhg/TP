@@ -1,0 +1,251 @@
+import sys, pygame, math, random
+pygame.init()
+
+waves = 0
+def wave():
+    z, r, s = 0, 0, 0
+    z, r, s = 10, 5 * waves//1, 5 * waves//2
+    return z, r, s
+    
+    
+        
+    
+
+# class Waves(object):
+#     def __init__(self):
+#         
+#     def 
+
+class Figure(object):
+    def __init__(self):
+        self.image= pygame.image.load("naruto1.png")
+        self.x = 200
+        self.y = 300
+        
+    def handle_keys(self):
+        """ Handles Keys """
+        key = pygame.key.get_pressed()
+        dist = 5
+        if key[pygame.K_s]: # down key
+            if self.y < 600:
+                self.y += dist # move down
+        elif key[pygame.K_w]: # up key
+            if self.y >20:
+                self.y -= dist # move up
+        elif key[pygame.K_d]: # right key
+            if self.x < 300:
+                self.x += dist # move right
+        elif key[pygame.K_a]: # left key
+            if self.x > 20:
+                self.x -= dist # move left
+    
+    def shoot(self):
+        figure.image = pygame.image.load("naruto2.png")
+        x,y = pygame.mouse.get_pos()
+        cx, cy = line.x, line.y
+        radius = math.sqrt(((x-cx)**2) + ((y-cy)**2))
+        angleHelper = (x-cx) / radius
+        print(y, cy)
+        if y <= cy:
+            angle = math.degrees(math.asin(angleHelper)) + 270
+        elif y > cy: # and x > cx:
+            angle = math.degrees(math.acos(angleHelper))
+        return (Blaster(cx,cy,angle))
+
+    def draw(self, surface):
+        screen.blit(self.image,(self.x, self.y))
+
+class Line(Figure):
+    #Invisible line extends from figure
+    def __init__(self):
+        self.x = figure.x +20
+        self.y = figure.y+40
+        
+    def handle_keys(self):
+        """ Handles Keys """
+        key = pygame.key.get_pressed()
+        dist = 5
+        if key[pygame.K_s]: # down key
+            if self.y < 650:
+                self.y += dist # move down
+        elif key[pygame.K_w]: # up key
+            if self.y >60:
+                self.y -= dist # move up
+        elif key[pygame.K_d]: # right key
+            if self.x < 330:
+                self.x += dist # move right
+        elif key[pygame.K_a]: # left key
+            if self.x > 50:
+                self.x -= dist # move left
+    
+    def draw(self,surface):
+        x0,y0 = pygame.mouse.get_pos()
+        pygame.draw.lines(screen, (0,0,0), True, [(self.x,self.y),(x0,y0)],5)
+   
+                
+    
+class Blaster(object):
+    # Model
+    def __init__(self, x, y, angle, ammo=111):
+        # A bullet has a position, a size, a direction
+        self.cx = x
+        self.cy = y
+        self.r = 2
+        self.angle = angle
+        self.speed = 40
+        self.ammo = ammo
+        self.originalAmmo = ammo
+    # View
+    def draw(self, surface):
+        radius = 10
+        pygame.draw.circle(surface, (10,60,130), (int(self.cx), int(self.cy)), radius)
+    # Controller
+    def moveBullet(self):
+        # Move according to the original trajectory
+        rad = math.radians(self.angle)
+        self.cx += (math.cos(rad)) * self.speed
+        self.cy += (math.sin(rad)) * self.speed
+        
+    def hitZombie(self, other):
+        # Check if the bullet and asteroid overlap at all
+        if(not isinstance(other, Zombie)): # Other must be a zombie
+            return False
+        else:
+            ((x,y),(w,z)) =other.zombieArea()
+            if self.cx > x and self.cx < y and self.cy>w and self.cy<z:
+                return True
+            return False
+    
+    def isOffscreen(self, width, height):
+        # Check if the bullet has moved fully offscreen
+        return (self.cx + self.r <= 0 or self.cx - self.r >= width) or \
+               (self.cy + self.r <= 0 or self.cy - self.r >= height)
+    
+    def reload(self):
+        self.ammo = self.originalAmmo
+
+
+class Zombie(object):
+    #Zombie has coordinates and hp
+    def __init__(self,x,y, hp = 3, speed = 5):
+        self.health = pygame.image.load("health.jpg")
+        self.image = pygame.image.load("zombie2.png")
+        self.hpBar = pygame.image.load("hp1.png")
+        self.x, self.y= x,y
+        self.hp = hp
+        self.speed = speed
+        
+    def draw(self, surface):
+        #Draws zombies and hp bar
+        for hp in range(self.hp):
+            screen.blit(self.health, (self.x+35+(10*hp),self.y-20))
+        screen.blit(self.hpBar, (self.x+10, self.y-30))
+        screen.blit(self.image,(self.x,self.y))
+    
+    def moveZombie(self):
+        #Moves zombies
+        self.x -= self.speed
+        self.y += random.randint(-10,10)
+    
+    def zombieArea(self):
+        #The area of a zombie that a blaster can hit
+        return ((self.x-10,self.x+10),(self.y-20,self.y+80))
+    
+    @staticmethod
+    def makeZombie():
+        zombieTypes = ["Zombie","Runner","Strong"]
+        
+        x = 1200
+        y = random.randint(30,600)
+        return (Zombie(x,y))
+# 
+# class Runner(Zombie):
+#     def__init__(self,x,y, hp=3, speed = 5):
+#         super().__init__(self,x,y, hp = 3)
+#         self.image = pygame.image.load("zombie2.png")
+#         self.speed = 12
+#     
+# class Strong(Zombie):
+#     def __init__(self,x,y,hp =3):
+#         super().__init__(self,x,y, hp = 3, speed = 5)
+#         self.hp = 15
+#         self.image = pygame.image.load("zombie3.png")
+        
+        
+screen = pygame.display.set_mode((1200, 700))
+
+
+figure = Figure() # create an instance
+# arm = Arm()
+line = Line()
+clock = pygame.time.Clock()
+
+
+##Time
+#Zombies
+makeZombie = pygame.USEREVENT+1
+pygame.time.set_timer(makeZombie, 2000)
+zombieList = []
+def createZombie():
+    zomb = Zombie.makeZombie()
+    zombieList.append(zomb) 
+
+walkZombie = pygame.USEREVENT+2
+pygame.time.set_timer(walkZombie,250)
+
+#Blasters
+blasterList = []
+
+def dontShoot():
+    figure.image = pygame.image.load("naruto1.png")
+notShoot = pygame.USEREVENT+3
+pygame.time.set_timer(notShoot, 200)
+
+running = True
+while running:
+    cursor = pygame.cursors.broken_x
+    pygame.mouse.set_cursor(*cursor)
+    click = pygame.mouse.get_pressed()
+    if click[0]:
+        shoot = figure.shoot()
+        blasterList.append(shoot)
+    #0 is x coordinate, y is a random int between 50, 650.
+    #every 0.5 seconds, create a zombie
+    # fill the screen with brown
+    
+    pygame.display.update()
+    screen.fill((185,122,86))
+    # handle every event since the last frame.
+    
+    if pygame.event.get(makeZombie):
+        createZombie()
+    if pygame.event.get(walkZombie):
+        for zombie in zombieList:
+            zombie.moveZombie()
+    if pygame.event.get(notShoot):
+        dontShoot()
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            zombieList = []
+            pygame.quit() # quit the screen
+            running = False
+    figure.handle_keys() # handle the keys
+    line.handle_keys()
+    line.draw(screen)
+    figure.draw(screen) # draw the figure to the screen
+    for zombie in zombieList:
+        zombie.draw(screen)
+    
+    for blast in blasterList:
+        blast.draw(screen)
+        blast.moveBullet()
+        if blast.isOffscreen(1200,700):
+            blasterList.remove(blast)
+        for zombie in zombieList:
+            if blast.hitZombie(zombie):
+                zombie.hp -= 1
+                if zombie.hp == 0:
+                    zombieList.remove(zombie)
+                blasterList.remove(blast)
+
+    clock.tick(40)
